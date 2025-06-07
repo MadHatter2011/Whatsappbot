@@ -1,37 +1,39 @@
-from flask import Flask, request, jsonify
 import os
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-latest_msg = {"from": "", "msg": ""}
-response_msg = {"to": "", "msg": ""}
+# Secret key from environment variable
+SECRET_KEY = os.getenv("ESP32_SECRET_KEY", "default_secret_key")
 
 @app.route("/")
 def index():
-    return "Jarvis API is online!"
+    return "Jarvis API online! Use POST /send_message with JSON and Authorization header."
 
-@app.route("/incoming", methods=["POST"])
-def receive_message():
-    data = request.json
-    latest_msg["from"] = data.get("from")
-    latest_msg["msg"] = data.get("msg")
-    return jsonify({"status": "received"})
+@app.route("/send_message", methods=["POST"])
+def send_message():
+    auth = request.headers.get("Authorization")
+    if auth != SECRET_KEY:
+        return jsonify({"error": "Unauthorized"}), 403
 
-@app.route("/poll", methods=["GET"])
-def get_latest():
-    return jsonify(latest_msg)
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Missing JSON body"}), 400
 
-@app.route("/respond", methods=["POST"])
-def set_response():
-    data = request.json
-    response_msg["to"] = data.get("to")
-    response_msg["msg"] = data.get("msg")
-    return jsonify({"status": "response saved"})
+    to = data.get("to")
+    msg = data.get("msg")
 
-@app.route("/get_response", methods=["GET"])
-def send_response():
-    return jsonify(response_msg)
+    if not to or not msg:
+        return jsonify({"error": "Missing 'to' or 'msg' fields"}), 400
 
-# Optional: Run locally for testing
+    # Simulate sending message
+    print(f"Sending message to {to}: {msg}")
+
+    return jsonify({
+        "status": "message received",
+        "to": to,
+        "msg": msg
+    })
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
