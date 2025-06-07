@@ -1,6 +1,13 @@
 # server.py
 from flask import Flask, request, jsonify
 app = Flask(__name__)
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+bot_token = os.getenv("BOT_TOKEN")
+secret = os.getenv("ESP32_SECRET")
 
 # Message inbox (holds latest incoming msg)
 latest_msg = {"from": "", "msg": ""}
