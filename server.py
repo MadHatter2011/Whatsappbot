@@ -4,16 +4,16 @@ from twilio.rest import Client
 
 app = Flask(__name__)
 
-# Load Twilio credentials from environment variables (set these on Render or your server)
+# Grab your Twilio credentials from environment variables
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-TWILIO_WHATSAPP_FROM = "whatsapp:+14155238886"  # Twilio Sandbox WhatsApp number, keep it like this
+TWILIO_WHATSAPP_FROM = "whatsapp:+14155238886"  # Twilio sandbox WhatsApp number
 
 client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 @app.route("/")
 def index():
-    return "Jarvis API online! Use POST /send_message with JSON: {to, msg}"
+    return "Jarvis API online! Use POST /send_message with JSON."
 
 @app.route("/send_message", methods=["POST"])
 def send_message():
@@ -21,7 +21,7 @@ def send_message():
     if not data:
         return jsonify({"error": "Missing JSON body"}), 400
 
-    to = data.get("to")  # format: whatsapp:+91xxxxxxxxxx
+    to = data.get("to")
     msg = data.get("msg")
 
     if not to or not msg:
@@ -34,13 +34,15 @@ def send_message():
             to=to
         )
         print(f"Sent message SID: {message.sid} to {to}")
+
         return jsonify({
-            "status": "sent",
-            "sid": message.sid,
+            "status": "message sent",
             "to": to,
-            "msg": msg
+            "msg": msg,
+            "sid": message.sid
         })
     except Exception as e:
+        print(f"Error sending message: {e}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
