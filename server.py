@@ -35,6 +35,18 @@ def set_response():
 
 @app.route("/get_response", methods=["GET"])
 def send_response():
+
+@app.route("/respond", methods=["POST"])
+def set_response():
+    data = request.json
+    token = request.headers.get("Authorization")
+
+    if token != os.getenv("ESP32_SECRET"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    response_msg["to"] = data.get("to")
+    response_msg["msg"] = data.get("msg")
+    return jsonify({"status": "response saved"})    
     return jsonify(response_msg)
 
 if __name__ == "__main__":
